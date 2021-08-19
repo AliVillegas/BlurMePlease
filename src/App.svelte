@@ -9,7 +9,6 @@
   }
   function doSomeMagic() {
     console.log("MAGIC");
-    console.log(chosenImage);
     let image = new Image();
     image.src = URL.createObjectURL(chosenImage);
     image.onload = function () {
@@ -22,9 +21,28 @@
 
   function manipulateImage(i) {
     let mat = cv.imread(i);
-    cv.cvtColor(mat, mat, cv.COLOR_RGB2GRAY);
-    cv.imshow("outputImage", mat);
+    let l = 5;
+    let u = 6;
+
+    cv.cvtColor(mat, mat, cv.COLOR_BGR2GRAY);
+    let gaussianBlurred = new cv.Mat();
+    let ksize = new cv.Size(5, 5);
+
+    document.getElementById("downloadButton").style.display = "block";
+
+    cv.GaussianBlur(mat, gaussianBlurred, ksize, 0, 0, cv.BORDER_DEFAULT);
+    cv.imshow("outputImage", gaussianBlurred);
+    let secondGrayPass = new cv.Mat();
+    cv.cvtColor(gaussianBlurred, secondGrayPass, cv.COLOR_BGR2GRAY);
+    cv.imshow("outputImage", secondGrayPass);
     mat.delete();
+  }
+
+  function download() {
+    var link = document.createElement("a");
+    link.download = "noBackground.png";
+    link.href = document.getElementById("outputImage").toDataURL();
+    link.click();
   }
 </script>
 
@@ -84,19 +102,19 @@
     <span style="margin-bottom: 10;"> Begone! </span>
   </button>
 </div>
-<div class="mx-auto d-block text-center my-3">
-  <canvas id="outputImage" width="500" />
-  <img id="input_img" width="500" height="500" alt="" style="display:none" />
-</div>
 <div class="mx-auto d-block text-center my-5">
   <button
-    class="begoneBtn borderPurple my-5"
+    class="begoneBtn borderPurple my-5 mx-auto "
     style="display:none"
     id="downloadButton"
-    on:click={doSomeMagic}
+    on:click={download}
   >
     <span style="margin-bottom: 10;"> Download! </span>
   </button>
+</div>
+<div class="mx-auto d-block text-center my-3">
+  <canvas id="outputImage" width="500" />
+  <img id="input_img" width="500" height="500" alt="" style="display:none" />
 </div>
 
 <style>
